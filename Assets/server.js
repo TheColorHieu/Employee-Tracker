@@ -68,4 +68,52 @@ function start() {
     }
 });
 }
+//next we will be adding our functions to help send and retrieve all departments in the sql 
+//this function will  help us retrieve data from our seeds file and see all departments
+//this first part will allow us to view information
+function viewAlllDepartments() {
+    const query =" SELECT * FROM departments";
+    connection.query(query, (err, res) => {
+        if (err) throw err;
+        console.table(res);
+        start();
+    });
+} 
 
+//our next function will allow us to see all roles 
+function viewAllRoles() {
+    const query = "SELECT * FROM roles";
+    connection.query(query, (err, res) => {
+        if(err) throw err;
+        console.table(res);
+        start();
+    });
+}
+
+//this next one will allow us to view all employees
+function viewAllEmployees() {
+    const query = "SELECT * FROM roles";
+    connection.query(query, (err, res) => {
+        if(err) throw err;
+        console.table(res);
+        start();
+    });
+}
+
+//these next functions will allow us to add more information 
+function addDepartment() {
+inquirer
+.prompt({
+    type: "input",
+    name: "departmentNfame",
+    message: "Enter the name of the department:",
+})
+.then((answer) => {
+    const query = "INSERT INTO departments (department_name) VALUES (?)";
+    connection.query(query, answer.departmentName, (err, res) =>{
+        if(err) throw err;
+        console.log("Department added successfully!");
+        start();
+    });
+});
+}
