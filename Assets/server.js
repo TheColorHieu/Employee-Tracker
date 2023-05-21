@@ -8,9 +8,9 @@ const connection = mysql.createConnection({
     //our port 
     port: 3306,
     //username
-    user: "root",
-    password: "bootcamp1234",
-    database: "employee_db"
+    user: "",
+    password: "",
+    database: ""
 });
 //this is how we are connecting mysql database 
 connection.connect((err) => {
@@ -42,7 +42,7 @@ function start() {
 
 .then((answer) => {
     //here we will be using a switch case in order for the program to execexute certain codes 
-    switch (answer.actijon){
+    switch (answer.action){
     case "View all departments":
         viewAlllDepartments();
         break;
@@ -54,6 +54,9 @@ function start() {
         break;
     case "Add a department":
         addDepartment();
+        break;
+    case "Add a role":
+        addRole();
         break;
     case "Add an employee":
         addEmployee();
@@ -116,4 +119,78 @@ inquirer
         start();
     });
 });
+}
+
+function addRole() {
+    const queryDepartments = " SELECT department_name FROM departments";
+    connection.query(queryDepartments, (err,departments) => {
+        if (err) throw err;
+        inquirer
+        .prompt([
+        {
+            type: "input",
+            name: "salary",
+            message: "Enter the role title: ",
+        },
+        {
+            type: "input",
+            name: "salary",
+            message: "Enter the salary for the role: ",
+        },
+        {
+            type: "list",
+            name: "departmentName",
+            message: "Select the department for the role: ",
+            choices: departments.map((d) => d.department_name),
+        },
+        ]).then((answer) => {
+            const query = "INSERT INTO roles (title,salary, department_name) VALUES (?,?,?)";
+            const values =[answer.title, answer.salary, answer.departmentName];
+            connection.query(query, values, (err,res) => {
+                if (err) throw err;
+                console.log("Role added successfully!");
+                start();
+            });
+        });
+    });
+}
+function addEmployee() {
+    const queryRoles =" SELECT id, title FROM roles";
+    connection.query(queryRoles, (err, roles) => {
+        if (err) throw err;
+        inquirer
+        .prompt([
+            {
+                type: "list",
+                name: "roleId",
+                message: "Select the role for the employee: ",
+                choices: roles.map((r) => ({ name: r.title, value: r.id})),
+            },
+            {
+                type: "list",
+                name: "managerId",
+                message: "Select the manager for the employee:",
+                choices: managers.map((m) => ({ name: m.name, value: m.id })),
+            },
+            {
+                type: "input",
+                name: "firstName",
+                message: "Enter the employee's first name:",
+            },
+            {
+                type: "input",
+                name: "lastName",
+                message: "Enter the employee's last name:",
+            },
+        ]).then((answer) => {
+            const query = "INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)";
+            const values = [answer.firstName, answer.lastName, answer.roleId, answer.managerId];
+            connection.query(query, values, (err,res) => {
+                if (err) throw err;
+                console.log("Employee added successfully!");
+                start();
+            });
+        });
+    
+    });
 }
