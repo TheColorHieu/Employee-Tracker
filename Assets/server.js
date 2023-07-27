@@ -8,9 +8,9 @@ const connection = mysql.createConnection({
     //our port 
     port: 3306,
     //username
-    user: "",
-    password: "",
-    database: ""
+    user: "root",
+    password: "bootcamp1234",
+    database: "employee_db"
 });
 //this is how we are connecting mysql database 
 connection.connect((err) => {
@@ -26,7 +26,7 @@ function start() {
         //we are using the list to have it display the information as a list
         type: "list",
         //the action  will store the users input 
-        name: "action",
+        name: "rawlist",
         message:"please select one of the following",
         //here we will have the questions that will be displayed to the user
         choices: [
@@ -95,7 +95,8 @@ function viewAllRoles() {
 
 //this next one will allow us to view all employees
 function viewAllEmployees() {
-    const query = "SELECT * FROM roles";
+    let query = `SELECT first_name, last_name, role.title FROM employee 
+    INNER JOIN role ON role.id=employee.rode_id`;
     connection.query(query, (err, res) => {
         if(err) throw err;
         console.table(res);
