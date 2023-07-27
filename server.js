@@ -1,5 +1,5 @@
 //our variables 
-const mysql = require("mysql2");
+const mysql = require("mysql");
 const inquirer = require("inquirer");
 
 //here we are creating a MySQL database 
@@ -26,7 +26,7 @@ function start() {
         //we are using the list to have it display the information as a list
         type: "list",
         //the action  will store the users input 
-        name: "rawlist",
+        name: "action",
         message:"please select one of the following",
         //here we will have the questions that will be displayed to the user
         choices: [
@@ -44,13 +44,13 @@ function start() {
     //here we will be using a switch case in order for the program to execexute certain codes 
     switch (answer.action){
     case "View all departments":
-        viewAlllDepartments();
+        viewAllDepartment();
         break;
     case "View all roles":
         viewAllRoles();
         break;
     case "View all employees":
-        viewAllEmployees();
+        viewAllEmployee();
         break;
     case "Add a department":
         addDepartment();
@@ -74,8 +74,8 @@ function start() {
 //next we will be adding our functions to help send and retrieve all departments in the sql 
 //this function will  help us retrieve data from our seeds file and see all departments
 //this first part will allow us to view information
-function viewAlllDepartments() {
-    const query =" SELECT * FROM departments";
+function viewAllDepartment() {
+    const query ="SELECT * FROM department";
     connection.query(query, (err, res) => {
         if (err) throw err;
         console.table(res);
@@ -93,10 +93,10 @@ function viewAllRoles() {
     });
 }
 
+
 //this next one will allow us to view all employees
-function viewAllEmployees() {
-    let query = `SELECT first_name, last_name, role.title FROM employee 
-    INNER JOIN role ON role.id=employee.rode_id`;
+function viewAllEmployee() {
+    let query = "SELECT * FROM employee";
     connection.query(query, (err, res) => {
         if(err) throw err;
         console.table(res);
@@ -109,11 +109,11 @@ function addDepartment() {
 inquirer
 .prompt({
     type: "input",
-    name: "departmentNfame",
+    name: "departmentName",
     message: "Enter the name of the department:",
 })
 .then((answer) => {
-    const query = "INSERT INTO departments (department_name) VALUES (?)";
+    const query = "INSERT INTO department (department_name) VALUES (?)";
     connection.query(query, answer.departmentName, (err, res) =>{
         if(err) throw err;
         console.log("Department added successfully!");
@@ -122,76 +122,81 @@ inquirer
 });
 }
 
+
+
 function addRole() {
-    const queryDepartments = " SELECT department_name FROM departments";
-    connection.query(queryDepartments, (err,departments) => {
+    const queryDepartment = "SELECT department_name FROM department";
+    connection.query(queryDepartment, (err, department) => {
         if (err) throw err;
         inquirer
-        .prompt([
-        {
-            type: "input",
-            name: "salary",
-            message: "Enter the role title: ",
-        },
-        {
-            type: "input",
-            name: "salary",
-            message: "Enter the salary for the role: ",
-        },
-        {
-            type: "list",
-            name: "departmentName",
-            message: "Select the department for the role: ",
-            choices: departments.map((d) => d.department_name),
-        },
-        ]).then((answer) => {
-            const query = "INSERT INTO roles (title,salary, department_name) VALUES (?,?,?)";
-            const values =[answer.title, answer.salary, answer.departmentName];
-            connection.query(query, values, (err,res) => {
-                if (err) throw err;
-                console.log("Role added successfully!");
-                start();
+            .prompt([
+                {
+                    type: "input",
+                    name: "title", // Fixed the duplicate key name issue here
+                    message: "Enter the role title: ",
+                },
+                {
+                    type: "input",
+                    name: "salary", // This is for the salary
+                    message: "Enter the salary for the role: ",
+                },
+                {
+                    type: "list",
+                    name: "departmentName",
+                    message: "Select the department for the role: ",
+                    choices: department.map((d) => d.department_name),
+                },
+            ])
+            .then((answer) => {
+                const query = "INSERT INTO roles (title, salary, department_name) VALUES (?, ?, ?)";
+                const values = [answer.title, answer.salary, answer.departmentName];
+                connection.query(query, values, (err, res) => {
+                    if (err) throw err;
+                    console.log("Role added successfully!");
+                    start();
+                });
             });
-        });
     });
 }
+
 function addEmployee() {
-    const queryRoles =" SELECT id, title FROM roles";
+    const queryRoles = "SELECT id, title FROM roles";
     connection.query(queryRoles, (err, roles) => {
         if (err) throw err;
         inquirer
-        .prompt([
-            {
-                type: "list",
-                name: "roleId",
-                message: "Select the role for the employee: ",
-                choices: roles.map((r) => ({ name: r.title, value: r.id})),
-            },
-            {
-                type: "list",
-                name: "managerId",
-                message: "Select the manager for the employee:",
-                choices: managers.map((m) => ({ name: m.name, value: m.id })),
-            },
-            {
-                type: "input",
-                name: "firstName",
-                message: "Enter the employee's first name:",
-            },
-            {
-                type: "input",
-                name: "lastName",
-                message: "Enter the employee's last name:",
-            },
-        ]).then((answer) => {
-            const query = "INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)";
-            const values = [answer.firstName, answer.lastName, answer.roleId, answer.managerId];
-            connection.query(query, values, (err,res) => {
-                if (err) throw err;
-                console.log("Employee added successfully!");
-                start();
+            .prompt([
+                {
+                    type: "list",
+                    name: "roleId",
+                    message: "Select the role for the employee: ",
+                    choices: roles.map((r) => ({ name: r.title, value: r.id })),
+                },
+                {
+                    type: "list",
+                    name: "managerId",
+                    message: "Select the manager for the employee:",
+                    choices: [{ name: "None", value: null }, ...roles.map((r) => ({ name: r.title, value: r.id }))], // Add None as an option
+                },
+                {
+                    type: "input",
+                    name: "firstName",
+                    message: "Enter the employee's first name:",
+                },
+                {
+                    type: "input",
+                    name: "lastName",
+                    message: "Enter the employee's last name:",
+                },
+            ])
+            .then((answer) => {
+                const query = "INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)";
+                const values = [answer.firstName, answer.lastName, answer.roleId, answer.managerId];
+                connection.query(query, values, (err, res) => {
+                    if (err) throw err;
+                    console.log("Employee added successfully!");
+                    start();
+                });
             });
-        });
-    
     });
 }
+
