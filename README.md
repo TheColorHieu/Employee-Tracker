@@ -41,3 +41,6 @@ THEN I am prompted to select an employee to update and their new role and this i
 first you got to install the packages by using npm i and then install inqurer@8.2.4 and mysql 
 after that open of you mysql in the terminal and run the two seeds by using source db/schema.sql and then db/seeds.sql 
 and then on an integrated terminal hit node server.js 
+
+## Walk Through video 
+[Untitled_ Jul 27, 2023 2_55 PM.webm](https://github.com/TheColorHieu/Employee-Tracker/assets/122814063/3cf8e6b9-b572-46d8-9de4-530760eec254)
